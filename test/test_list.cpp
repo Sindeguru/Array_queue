@@ -2,8 +2,8 @@
 
 #include "../gtest/gtest.h"
 
-TEST(TList, can_create_steck_with_positive_length)
+TEST(TListArray, can_create_steck_with_positive_length)
 {
-  ASSERT_NO_THROW(TList<int> bf(3));
+  ASSERT_NO_THROW(TListArray<int> bf(3));
 }
 

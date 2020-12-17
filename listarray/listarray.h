@@ -1,60 +1,64 @@
 ﻿#pragma once
 #include <iostream>
-#include "listelem.h"
-
+#include "listarrayiterator.h"
 using namespace std;
 
-
 template <class T>
-class TList
+class TListArray
 {
 protected:
-  TListElem* root;
-  TListElem* end;
+  T* data; 
+  int* links;
+  int size;
+  int root;
   int count; 
 
 public:
-  TList();
-  TList(TList<T>& _v);
-  ~TList();
+  TListArray(int _size = 1);
+  TListArray(TListArray<T>& _v);
+  ~TListArray();
 
-  TList<T>& operator =(TList<T>& _v);
+  TListArray<T>& operator =(TListArray<T>& _v);
 
   void InsFirst(T d);
   void InsLast(T d);
-  void Ins(TListElem<T>* e, T d);
-
   bool IsEmpty(void) const;
+  bool IsFull(void) const;
 
-  TListElem<T>* GetFirst();
-  TListElem<T>* GetLast();
+  TListArrayIterator<T>* begin();
+  TListArrayIterator<T>* end();
 
   void DellFirst();
   void DellLast();
-  void Dell(TListElem<T>* e);
+  T GetFirst();
+  T GetLast();
 
   template<class T1>
-  friend ostream& operator<< (ostream& ostr, const TList<T1>& A);
+  friend ostream& operator<< (ostream& ostr, const TListArray<T1>& A);
   template<class T1>
-  friend istream& operator>> (istream& istr, TList<T1>& A);
+  friend istream& operator>> (istream& istr, TListArray<T1>& A);
+
+  template <class T>
+  friend class TListArrayIterator;
 
   int GetCount();
 };
 
 template<class T1>
-inline ostream& operator<<(ostream& ostr, const TList<T1>& A)
+inline ostream& operator<<(ostream& ostr, const TListArray<T1>& A)
 {
-  TListElem<T>* i = A.root;
-  while (i != 0)
+  int i = A.root;
+  while (A.links[i] != -1)
   {
-    ostr << *i << endl;
-    i = i->GetNext;
+    ostr << A.data[i];
+    i = A.links[i];
   }
+
   return ostr;
 }
 
 template<class T1>
-inline istream& operator>>(istream& istr, TList<T1>& A)
+inline istream& operator>>(istream& istr, TListArray<T1>& A)
 {
   int Count = 0;
   istr >> Count;
@@ -68,187 +72,221 @@ inline istream& operator>>(istream& istr, TList<T1>& A)
 }
 
 template<class T>
-inline TList<T>::TList()
+inline TListArray<T>::TListArray(int _size)
 {
-  root = 0;
-  end = 0;
+  if (_size <= 0)
+    throw "logic_error";
+  size = _size;
+  
+  data = new T[size];
+  links = new int[size];
   count = 0;
+
+  for (int i = 0; i < _size; i++)
+  {
+    links[i] = -1;
+  }
+  root = -1;
 }
 
 template<class T>
-inline TList<T>::TList(TList& _v)
+inline TListArray<T>::TListArray(TListArray& _v)
 {
   count = _v.count;
-  TListElem<T>* i = _v.root;
-  TListElem<T>* j = this->root;
-  TListElem<T>* p = 0;
+  size = _v.size;
+  root = _v.root;
 
-  while (i != 0)
+  data = new T[size];
+  links = new int[size];
+
+  for (int i = 0; i < size; i++)
   {
-    j = new TListElem<T>(*i);
-    j->SetNext(0);
-    if (p != 0)
-    {
-      p->SetNext(j);
-      j->SetPrev(p);
-    }
-    else
-      p = j;
-
-    if (root == 0)
-      root = j;
-
-    end = j;
-
-    i = i->GetNext();
+    links[i] = _v.links[i];
+    data[i] = _v.data[i];  
   }
 }
 
 template<class T>
-inline TList<T>::~TList()
+inline TListArray<T>::~TListArray()
 {
-  if (this->root != 0)
+  if (data != 0)
   {
-    TListElem<T>* i = this->root;
-    TListElem<T>* p = 0;
-
-    while (i != 0)
-    {
-      p = i;
-      i = i->GetNext();
-      delete p;
-    }
-    this->root = 0;
-    this->end = 0;
+    delete[] data;
+    delete[] links;
+    data = 0;
+    links = 0;
     count = 0;
+    size = 0;
+    root = -1;
   }
 }
 
 template<class T>
-inline TList<T>& TList<T>::operator=(TList<T>& _v)
+inline TListArray<T>& TListArray<T>::operator=(TListArray<T>& _v)
 {
   if (this == _v)
     return *this;
 
-  if (this->root != 0)
+  if (size != _v.size)
   {
-    TListElem<T>* i = this->root;
-    TListElem<T>* p = 0;
+    delete[] data;
+    delete[] links;
+    
+    size = _v.size;
+    data = new T[size];
+    links = new int[size];
+    count = _v.size;
 
-    while (i != 0)
+    for (int i = 0; i < size; i++)
     {
-      p = i;
-      i = i->GetNext();
-      delete p;
+      links[i] = _v.links[i];
+      data[i] = _v.data[i];
     }
-    this->root = 0;
-    this->end = 0;
-    count = 0;
+
+    return this;
   }
-
-  count = _v.count;
-  TListElem<T>* i = _v.root;
-  TListElem<T>* j = this->root;
-  TListElem<T>* p = 0;
-
-  while (i != 0)
+  else
   {
-    j = new TListElem<T>(*i);
-    j->SetNext(0);
-    if (p != 0)
+    count = _v.count;
+    for (int i = 0; i < size; i++)
     {
-      p->SetNext(j);
-      j->SetPrev(p);
+      links[i] = _v.links[i];
+      data[i] = _v.data[i];
     }
-    else
-      p = j;
-
-    if (root == 0)
-      root = j;
-
-    end = j;
-
-    i = i->GetNext();
   }
 }
 
 template<class T>
-inline void TList<T>::InsFirst(T d)
+inline void TListArray<T>::InsFirst(T d)
 {
-  TLisElem<T> tmp = new TListElem<T>(d);
-  tmp->SetNext(root);
-  root = tmp;
+  if (this->IsFull())
+    throw "List is Full";
+  int i;
+  for (i = 0; i < size; i++)
+  {
+    if (links[i] == -1)
+      break;
+  }
+  data[i] = d;
+  links[i] = root;
+  root = i;
   count++;
 }
 
 template<class T>
-inline void TList<T>::InsLast(T d)
+inline void TListArray<T>::InsLast(T d)
 {
-  TLisElem<T> tmp = new TListElem<T>(d);
-  tmp->SetPrev(end);
-  end = tmp;
+  if(this->IsFull())
+    throw "List is Full";
+  if (this->IsEmpty())
+  {
+    root = 0;
+    data[0] = d;
+    links[0] = -1;
+  }
+  else
+  {
+    for (i = 0; i < size; i++)
+    {
+      if (links[i] == -1)
+        break;
+    }
+
+    int end = root;
+    while (links[end] != -1)
+      end = links[end];
+
+    data[i] = d;
+    links[i] = -1;
+    links[end] = i;
+  }
   count++;
 }
 
 template<class T>
-inline void TList<T>::Ins(TListElem<T>* e, T d)
-{
-  TLisElem<T> tmp = new TListElem<T>(d);
-  tmp->SetNext(e->GetNext());
-  tmp->SetPrev(e);
-  e->GetNext()->SetPrev(tmp);
-  e->SetNext(tmp);
-  count++;
-}
-
-template<class T>
-inline bool TList<T>::IsEmpty(void) const
+inline bool TListArray<T>::IsEmpty(void) const
 {
   return count == 0;
 }
 
 template<class T>
-inline TListElem<T>* TList<T>::GetFirst()
+inline bool TListArray<T>::IsFull(void) const
 {
-  return root;
+  return count == size;
 }
 
 template<class T>
-inline TListElem<T>* TList<T>::GetLast()
+inline TListArrayIterator<T>* TListArray<T>::begin()
 {
-  return end;
+  return TListArrayIterator<T>(*this, root);
 }
 
 template<class T>
-inline void TList<T>::DellFirst()
+inline TListArrayIterator<T>* TListArray<T>::end()
 {
-  TListElem<T>* i = root;
-  root = root->GetNext();
-  delete i;
+  return TListArrayIterator<T>(*this, -1);
+}
+
+template<class T>
+inline void TListArray<T>::DellFirst()
+{
+  if (this->IsEmpty())
+    throw "List is Empty";
+  
+  int i = root;
+  root = links[root];
+  links[i] = -1;
+
   count--;
 }
 
 template<class T>
-inline void TList<T>::DellLast()
+inline void TListArray<T>::DellLast()
 {
-  TListElem<T>* i = end;
-  end = end->GetPrev();
-  delete i;
+  if (this->IsEmpty())
+    throw "List is Empty";
+
+  if (links[root] == -1)
+    root = -1;
+  else
+  {
+    int pEnd = root; // (end - 1) element
+    int end = links[root];
+
+    while (links[end] != -1)
+    {
+      pEnd = end;
+      end = links[end];
+    }
+    links[pEnd] = -1;
+    linls[end] = -1;
+  }
   count--;
 }
 
 template<class T>
-inline void TList<T>::Dell(TListElem<T>* e)
+inline T TListArray<T>::GetFirst()
 {
-  e->GetPrev()->SetNext(e->GetNext());
-  e->GetNext()->SetPrev(e->GetPrev());
-
-  count--;
-  delete e;
+  if (this->IsEmpty())
+    throw "List is Empty";
+  
+  return data[root];
 }
 
 template<class T>
-inline int TList<T>::GetCount()
+inline T TListArray<T>::GetLast()
+{
+  if (this->IsEmpty())
+    throw "List is Empty";
+
+  int end = root;
+  while (links[end] != -1)
+    end = links[end];
+  return data[end];
+}
+
+template<class T>
+inline int TListArray<T>::GetCount()
 {
   return count;
 }

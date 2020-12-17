@@ -5,7 +5,7 @@ project(${PROJECT_NAME}) # Название проекта
 
 set(main main) #Переменная с именем приложения
 set(list list) #Переменная с именем библиотеки
-set(listelem listelem)
+set(listarrayiterator listarrayiterator)
 set(listarray listarray)
 set(test test)
 set(gtest gtest)
@@ -15,13 +15,13 @@ if(NOT CMAKE_BUILD_TYPE) # проверка имеющихся у компиля
   set(CMAKE_BUILD_TYPE Release) #Если нет то устанавливаем Release
 endif()
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/list ${CMAKE_CURRENT_SOURCE_DIR}/listelem ${CMAKE_CURRENT_SOURCE_DIR}/listarray) #Добавляем директорию "${CMAKE_CURRENT_SOURCE_DIR}/vectorlib" в дополняемые каталоги включаемых файлов
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/list ${CMAKE_CURRENT_SOURCE_DIR}/listarrayiterator ${CMAKE_CURRENT_SOURCE_DIR}/listarray) #Добавляем директорию "${CMAKE_CURRENT_SOURCE_DIR}/vectorlib" в дополняемые каталоги включаемых файлов
 #${CMAKE_CURRENT_SOURCE_DIR} - стандартная переменная с адресом рабочей директории
 
 add_subdirectory(main) #Добавляем директорию с под-CMakeList-ом, и выполняем под-CMakeList
 add_subdirectory(list)
+add_subdirectory(listarrayiterator)
 add_subdirectory(listarray)
-add_subdirectory(listelem)
 add_subdirectory(test)
 add_subdirectory(gtest)
 
