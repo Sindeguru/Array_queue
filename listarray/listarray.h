@@ -75,7 +75,7 @@ template<class T>
 inline TListArray<T>::TListArray(int _size)
 {
   if (_size <= 0)
-    throw "logic_error";
+    throw logic_error("size must > 0");
   size = _size;
   
   data = new T[size];
@@ -124,35 +124,23 @@ inline TListArray<T>::~TListArray()
 template<class T>
 inline TListArray<T>& TListArray<T>::operator=(TListArray<T>& _v)
 {
-  if (this == _v)
-    return *this;
-
-  if (size != _v.size)
-  {
-    delete[] data;
-    delete[] links;
-    
-    size = _v.size;
-    data = new T[size];
-    links = new int[size];
-    count = _v.size;
-
-    for (int i = 0; i < size; i++)
-    {
-      links[i] = _v.links[i];
-      data[i] = _v.data[i];
-    }
-
-    return this;
-  }
-  else
   {
     count = _v.count;
+    size = _v.size;
+    root = _v.root;
+    if (data != 0)
+    {
+      delete[] data;
+      delete[] links;
+    }
+    data = new T[size];
+    links = new T[size];
     for (int i = 0; i < size; i++)
     {
       links[i] = _v.links[i];
       data[i] = _v.data[i];
     }
+    return *this;
   }
 }
 
@@ -160,7 +148,7 @@ template<class T>
 inline void TListArray<T>::InsFirst(T d)
 {
   if (this->IsFull())
-    throw "List is Full";
+    throw logic_error("List is Full");
   int i;
   for (i = 0; i < size; i++)
   {
@@ -177,7 +165,7 @@ template<class T>
 inline void TListArray<T>::InsLast(T d)
 {
   if(this->IsFull())
-    throw "List is Full";
+    throw logic_error("List is Full");
   if (this->IsEmpty())
   {
     root = 0;
@@ -231,7 +219,7 @@ template<class T>
 inline void TListArray<T>::DellFirst()
 {
   if (this->IsEmpty())
-    throw "List is Empty";
+    throw logic_error("List is Empty");
   
   int i = root;
   root = links[root];
@@ -244,7 +232,7 @@ template<class T>
 inline void TListArray<T>::DellLast()
 {
   if (this->IsEmpty())
-    throw "List is Empty";
+    throw logic_error("List is Empty");
 
   if (links[root] == -1)
     root = -1;
@@ -268,7 +256,7 @@ template<class T>
 inline T TListArray<T>::GetFirst()
 {
   if (this->IsEmpty())
-    throw "List is Empty";
+    throw logic_error("List is Empty");
   
   return data[root];
 }
@@ -277,7 +265,7 @@ template<class T>
 inline T TListArray<T>::GetLast()
 {
   if (this->IsEmpty())
-    throw "List is Empty";
+    throw logic_error("List is Empty");
 
   int end = root;
   while (links[end] != -1)

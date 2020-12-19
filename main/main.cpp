@@ -10,7 +10,7 @@ int main()
 	A.InsLast('b');
 	A.InsFirst('c');
 
-	TListArrayIterator<char> i = d.begin();
+	TListArrayIterator<char> i = *A.begin();
 
 	while (i.IsGoNext())
 	{
